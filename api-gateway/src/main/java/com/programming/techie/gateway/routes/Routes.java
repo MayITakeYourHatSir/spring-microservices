@@ -19,7 +19,6 @@ public class Routes {
         return GatewayRouterFunctions.route("product-service")
                 .route(RequestPredicates.path("/api/products/**"), http())
                 .before(uri("http://localhost:8080"))
-
                 .build();
     }
 

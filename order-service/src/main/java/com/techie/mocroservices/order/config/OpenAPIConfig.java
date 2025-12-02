@@ -17,7 +17,7 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI OrderServiceAPI() {
         return new OpenAPI()
-                .servers(List.of(new Server().url(serverUrl)))
+                .servers(List.of(new Server().url(serverUrl).description("API Gateway")))
                 .info(new io.swagger.v3.oas.models.info.Info()
                         .title("Order Service API")
                         .version("1.0.0")
