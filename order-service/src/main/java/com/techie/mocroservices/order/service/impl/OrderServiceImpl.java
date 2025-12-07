@@ -1,12 +1,14 @@
 package com.techie.mocroservices.order.service.impl;
 
 import com.techie.mocroservices.order.client.InventoryClient;
+import com.techie.mocroservices.order.event.OrderPlacedEvent;
 import com.techie.mocroservices.order.model.Order;
 import com.techie.mocroservices.order.model.OrderRequest;
 import com.techie.mocroservices.order.repo.OrderRepository;
 import com.techie.mocroservices.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,6 +20,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final InventoryClient inventoryClient;
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     @Override
     public void placeOrder(OrderRequest orderRequest) {
@@ -31,6 +34,11 @@ public class OrderServiceImpl implements OrderService {
             order.setSkuCode(orderRequest.skuCode());
             order.setQuantity(orderRequest.quantity());
             orderRepository.save(order);
+
+            // Send the message to Kafka Topic
+            OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(order.getOrderNumber(),
+                    orderRequest.userDetails().email());
+            kafkaTemplate.send("order-placed-event", orderPlacedEvent);
         }else {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Product with SkuCode " + orderRequest.skuCode() + " is not in stock");
