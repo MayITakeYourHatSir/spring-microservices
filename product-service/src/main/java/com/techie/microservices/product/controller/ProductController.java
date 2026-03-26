@@ -79,9 +79,9 @@ public class ProductController {
     @Operation(
             summary = "2.1.5 依搜尋條件取得商品列表",
             description = "依搜尋條件取得對應商品並限制資料筆數，條件包含商品 id、名字、是否上架以及上架日期")
-    @GetMapping
+    @PostMapping("/list")
     ResponseEntity<ApiResponse> getProducts(
-            ProductSearchRequest request,
+            @RequestBody ProductSearchRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){

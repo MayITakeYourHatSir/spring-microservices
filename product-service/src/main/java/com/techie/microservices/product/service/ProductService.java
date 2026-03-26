@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
@@ -45,7 +44,6 @@ public class ProductService {
         if(request.description() != null) product.setDescription(request.description());
         if(request.price() != null) product.setPrice(BigDecimal.valueOf(request.price()));
         if(request.stockQuantity() != null) product.setStockQuantity(request.stockQuantity());
-        product.setUpdatedAt(LocalDate.now());
         productRepository.save(product);
     }
 
@@ -83,9 +81,9 @@ public class ProductService {
                 product.getPrice().intValue(),
                 product.getStockQuantity(),
                 product.getIsActive(),
-                product.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                product.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 product.getUpdatedAt() == null ? null :
-                        product.getUpdatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                        product.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
         );
     }
 
