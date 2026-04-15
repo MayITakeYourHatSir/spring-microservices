@@ -26,4 +26,7 @@ public class Inventory {
     @Column(name = "reserved_stock", nullable = false)
     private Integer reservedStock;
 
+    @Version
+    private Integer version;
+
 }

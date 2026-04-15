@@ -1,8 +1,10 @@
 package com.techie.microservices.inventory.controller;
 
 import com.techie.common.dto.ApiResponse;
+import com.techie.microservices.inventory.model.DeductRequest;
 import com.techie.microservices.inventory.model.InventoryResponse;
 import com.techie.microservices.inventory.service.InventoryService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,7 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-//    @GetMapping
-//    @ResponseStatus(HttpStatus.OK)
-//    public boolean isInStock(@RequestParam String skuCode, @RequestParam Integer quantity) {
-//        return inventoryService.isInStock(skuCode, quantity);
-//    }
-
+    @Operation(summary = "2.2.1 取得商品庫存", description = "取得商品庫存")
     @GetMapping("/{skuCode}")
     public ResponseEntity<ApiResponse> getInventory(@PathVariable String skuCode) {
         InventoryResponse inventoryResponse = inventoryService.getBySkuCode(skuCode);
@@ -35,6 +32,19 @@ public class InventoryController {
                 .build();
 
         return ResponseEntity.ok().body(response);
+    }
+
+    @Operation(summary = "2.2.2 扣除商品庫存", description = "扣除商品庫存")
+    @PostMapping("/deduct")
+    public ApiResponse deduct(@RequestBody DeductRequest req) {
+
+        inventoryService.deductStock(req.getSkuCode(), req.getQty());
+
+        return ApiResponse.builder()
+                .status(HttpStatus.OK)
+                .message("扣庫存成功")
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 
 }
