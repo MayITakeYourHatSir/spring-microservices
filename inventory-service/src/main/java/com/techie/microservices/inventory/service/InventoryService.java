@@ -26,7 +26,7 @@ public class InventoryService {
         int updated = inventoryRepository.deductStock(skuCode, qty);
 
         if (updated == 0) {
-            throw new RuntimeException("庫存不足");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "此商品庫存不足!");
         }
     }
 
