@@ -4,9 +4,11 @@ import com.techie.microservices.product.model.Product;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface ProductRepository
-        extends MongoRepository<Product, String>,
-        ProductRepositoryCustom {
+import java.util.List;
 
+@Repository
+public interface ProductRepository extends MongoRepository<Product, String>, ProductRepositoryCustom {
+
+    List<Product> findByIdIn(List<String> ids);
+    
 }

@@ -5,10 +5,12 @@ import com.techie.microservices.product.repo.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -73,6 +75,19 @@ public class ProductService {
         return productRepository.findProductList(condition, page, size);
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductListResponse> getProductsByIds(
+            List<String> productIds
+    ) {
+
+        List<Product> products =
+                productRepository.findByIdIn(productIds);
+
+        return products.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private ProductResponse convertToProductDto(Product product){
         return new ProductResponse(
                 product.getId(),
@@ -85,6 +100,16 @@ public class ProductService {
                 product.getUpdatedAt() == null ? null :
                         product.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
         );
+    }
+
+    private ProductListResponse toResponse(Product product) {
+
+        return ProductListResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .isActive(product.getIsActive())
+                .createdAt(product.getCreatedAt())
+                .build();
     }
 
 }

@@ -1,9 +1,12 @@
 package com.techie.microservices.product.model;
 
-import java.time.LocalDate;
+import lombok.Builder;
 
+import java.time.LocalDateTime;
+
+@Builder
 public record ProductListResponse(String id,
                                   String name,
                                   Boolean isActive,
-                                  LocalDate createdAt) {
+                                  LocalDateTime createdAt) {
 }
