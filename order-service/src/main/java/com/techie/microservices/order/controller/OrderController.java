@@ -1,11 +1,12 @@
 package com.techie.microservices.order.controller;
 
+import com.techie.common.dto.ApiResponse;
 import com.techie.microservices.order.model.CreateOrderRequest;
 import com.techie.microservices.order.model.CreateOrderResponse;
-import com.techie.microservices.order.model.OrderRequest;
 import com.techie.microservices.order.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,19 +16,15 @@ public class OrderController {
 
     private final OrderService orderService;
 
-//    @PostMapping
-//    @ResponseStatus(HttpStatus.OK)
-//    String placeOrder(@RequestBody OrderRequest orderRequest) {
-//        orderService.placeOrder(orderRequest);
-//        return "Order Placed Successfully";
-//    }
-
+    @Operation(summary = "2.3.1 新增訂單", description = "新增訂單")
     @PostMapping
-    public CreateOrderResponse createOrder(
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
             @RequestBody CreateOrderRequest request,
             @RequestHeader(value = "Idempotency-Key", required = false) String key) {
 
-        return orderService.createOrder(request, key);
+        CreateOrderResponse createOrderResponse = orderService.createOrder(request, key);
+
+        return ResponseEntity.ok(ApiResponse.success(createOrderResponse));
     }
 
 }

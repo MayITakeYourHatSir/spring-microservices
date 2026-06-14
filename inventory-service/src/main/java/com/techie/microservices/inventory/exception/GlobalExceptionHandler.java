@@ -6,36 +6,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse> handleBusinessException(BusinessException ex) {
-
-        ErrorCode errorCode = ex.getErrorCode();
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.builder()
-                        .status(HttpStatus.BAD_REQUEST)
-                        .message(errorCode.getMessage())
-                        .data(errorCode.getCode())
-                        .timestamp(LocalDateTime.now())
-                        .build());
+                .body(ApiResponse.fail(
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage()
+                    )
+                );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleException(Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .message("系統錯誤")
-                        .timestamp(LocalDateTime.now())
-                        .build());
+                .body(ApiResponse.fail(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ex.getMessage()
+                    )
+                );
     }
 
 }

@@ -172,27 +172,4 @@ public class OrderService {
         return order;
     }
 
-//    public void placeOrder(OrderRequest orderRequest) {
-//        boolean isInStock = inventoryClient.isInStock(orderRequest.skuCode(), orderRequest.quantity());
-//
-//        if(isInStock){
-//            Order order = new Order();
-//            order.setId(orderRequest.id());
-//            order.setOrderNumber(UUID.randomUUID().toString());
-//            order.setPrice(orderRequest.price());
-//            order.setSkuCode(orderRequest.skuCode());
-//            order.setQuantity(orderRequest.quantity());
-//            orderRepository.save(order);
-//
-//            // Send the message to Kafka Topic
-//            OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(order.getOrderNumber(),
-//                    orderRequest.userDetails().email());
-//            kafkaTemplate.send("order-placed", orderPlacedEvent);
-//        }else {
-//            throw new ResponseStatusException(HttpStatus.CONFLICT,
-//                    "Product with SkuCode " + orderRequest.skuCode() + " is not in stock");
-//        }
-//
-//    }
-
 }
