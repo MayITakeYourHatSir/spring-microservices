@@ -1,9 +1,6 @@
 package com.techie.microservices.order.mapper;
 
-import com.techie.microservices.order.model.CreateOrderResponse;
-import com.techie.microservices.order.model.Order;
-import com.techie.microservices.order.model.OrderItem;
-import com.techie.microservices.order.model.OrderItemDto;
+import com.techie.microservices.order.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,6 +30,33 @@ public class OrderMapper {
                 .price(item.getPrice())
                 .quantity(item.getQuantity())
                 .build();
+    }
+
+    public OrderDetailResponse toDetailResponse(
+            Order order
+    ) {
+
+        return new OrderDetailResponse(
+                order.getId(),
+                order.getUserId(),
+                order.getStatus(),
+                order.getTotalAmount(),
+                order.getCreatedAt(),
+                order.getItems()
+                        .stream()
+                        .map(this::toItemResponse)
+                        .toList()
+        );
+    }
+
+    private OrderItemResponse toItemResponse(OrderItem item) {
+
+        return new OrderItemResponse(
+                item.getProductId(),
+                item.getProductName(),
+                item.getPrice(),
+                item.getQuantity()
+        );
     }
 
 }

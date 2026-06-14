@@ -3,6 +3,7 @@ package com.techie.microservices.order.controller;
 import com.techie.common.dto.ApiResponse;
 import com.techie.microservices.order.model.CreateOrderRequest;
 import com.techie.microservices.order.model.CreateOrderResponse;
+import com.techie.microservices.order.model.OrderDetailResponse;
 import com.techie.microservices.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,16 @@ public class OrderController {
         CreateOrderResponse createOrderResponse = orderService.createOrder(request, key);
 
         return ResponseEntity.ok(ApiResponse.success(createOrderResponse));
+    }
+
+    @Operation(summary = "2.3.2 查詢訂單", description = "查詢訂單")
+    @GetMapping("/{orderId}")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrder(
+            @PathVariable Long orderId) {
+
+        OrderDetailResponse response = orderService.getOrder(orderId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
 }

@@ -2,6 +2,7 @@ package com.techie.microservices.order.service;
 
 import com.techie.microservices.order.client.dto.ProductListResponse;
 import com.techie.microservices.order.exception.DuplicateOrderException;
+import com.techie.microservices.order.exception.OrderNotFoundException;
 import com.techie.microservices.order.exception.ProductInactiveException;
 import com.techie.microservices.order.exception.ProductNotFoundException;
 import com.techie.microservices.order.facade.InventoryFacade;
@@ -73,6 +74,19 @@ public class OrderService {
                             "Order already exists : " + order.getId()
                     );
                 });
+    }
+
+    @Transactional
+    public OrderDetailResponse getOrder(Long orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new OrderNotFoundException(
+                                "Order not found : " + orderId
+                        )
+                );
+
+        return orderMapper.toDetailResponse(order);
     }
 
     private List<String> extractProductIds(
