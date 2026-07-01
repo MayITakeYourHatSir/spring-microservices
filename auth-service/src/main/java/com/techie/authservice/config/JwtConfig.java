@@ -2,58 +2,29 @@ package com.techie.authservice.config;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.techie.common.security.RsaKeyLoader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
-
 @Configuration
+@RequiredArgsConstructor
 public class JwtConfig {
 
-    @Bean
-    public KeyPair keyPair() {
-
-        try {
-
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-
-            generator.initialize(2048);
-
-            return generator.generateKeyPair();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final RsaKeyLoader rsaKeyLoader;
 
     @Bean
-    public JWKSource<SecurityContext> jwkSource(KeyPair keyPair) {
+    public JwtEncoder jwtEncoder() {
 
-        RSAKey rsaKey =
-                new RSAKey.Builder(
-                        (RSAPublicKey) keyPair.getPublic())
-                        .privateKey(
-                                (RSAPrivateKey) keyPair.getPrivate())
-                        .keyID(UUID.randomUUID().toString())
-                        .build();
+        RSAKey rsaKey = new RSAKey.Builder(rsaKeyLoader.loadPublicKey())
+                .privateKey(rsaKeyLoader.loadPrivateKey())
+                .build();
 
-        JWKSet jwkSet = new JWKSet(rsaKey);
-
-        return (selector, context) ->
-                selector.select(jwkSet);
+        return new NimbusJwtEncoder(
+                new ImmutableJWKSet<>(new JWKSet(rsaKey)));
     }
 
-    @Bean
-    public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
-
-        return new NimbusJwtEncoder(jwkSource);
-    }
 }

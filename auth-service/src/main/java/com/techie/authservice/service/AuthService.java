@@ -41,7 +41,7 @@ public class AuthService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(user.getUsername())
                 .issuedAt(now)
-                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
+                .expiresAt(now.plus(60, ChronoUnit.MINUTES))
                 .claim("roles", scope)
                 .build();
 

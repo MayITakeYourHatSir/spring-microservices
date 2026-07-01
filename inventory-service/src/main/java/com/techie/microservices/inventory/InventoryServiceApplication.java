@@ -3,7 +3,11 @@ package com.techie.microservices.inventory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(
+        scanBasePackages = {
+                "com.techie.microservices.inventory",
+                "com.techie.common.security"}
+)
 public class InventoryServiceApplication {
 
     public static void main(String[] args) {

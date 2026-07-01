@@ -7,10 +7,7 @@ import com.techie.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,6 +23,12 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(loginRequest);
 
         return ResponseEntity.ok(ApiResponse.success(loginResponse));
+    }
+
+    @GetMapping("/test")
+    String test(){
+        System.out.println("test");
+        return "test";
     }
 
 }
