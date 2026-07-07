@@ -2,8 +2,8 @@ package com.techie.microservices.order.facade;
 
 import com.techie.common.dto.ApiResponse;
 import com.techie.microservices.order.client.ProductClient;
-import com.techie.microservices.order.client.dto.ProductIdsRequest;
-import com.techie.microservices.order.client.dto.ProductListResponse;
+import com.techie.microservices.order.client.dto.ProductSkusRequest;
+import com.techie.microservices.order.client.dto.ProductResponse;
 import com.techie.microservices.order.exception.ProductServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,22 +17,15 @@ public class ProductFacade {
 
     private final ProductClient productClient;
 
-    public List<ProductListResponse> getProductsByIds(
-            List<String> productIds
-    ) {
+    public List<ProductResponse> getProductsBySkus(List<String> productSkus) {
 
-        ResponseEntity<ApiResponse<List<ProductListResponse>>> response =
-                productClient.getProductsByIds(
-                        new ProductIdsRequest(productIds)
-                );
+        ResponseEntity<ApiResponse<List<ProductResponse>>> response =
+                productClient.getProductsBySkus(new ProductSkusRequest(productSkus));
 
-        ApiResponse<List<ProductListResponse>> body =
-                response.getBody();
+        ApiResponse<List<ProductResponse>> body = response.getBody();
 
         if (body == null || body.getData() == null) {
-            throw new ProductServiceException(
-                    "Failed to retrieve products"
-            );
+            throw new ProductServiceException("Failed to retrieve products");
         }
 
         return body.getData();

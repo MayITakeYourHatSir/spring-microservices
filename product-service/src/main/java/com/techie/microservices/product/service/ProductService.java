@@ -69,22 +69,16 @@ public class ProductService {
                 .createdAt(request.getCreatedAt())
                 .build();
 
-        PageResponse<ProductListResponse> pageResponse = productRepository.findProductList(condition, page, size);
-        System.out.println("pageResponse: "+pageResponse);
-
         return productRepository.findProductList(condition, page, size);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductListResponse> getProductsByIds(
-            List<String> productIds
-    ) {
+    public List<ProductResponseForOrder> getProductsBySkus(List<String> productSkus) {
 
-        List<Product> products =
-                productRepository.findByIdIn(productIds);
+        List<Product> products = productRepository.findBySkuCodeIn(productSkus);
 
         return products.stream()
-                .map(this::toResponse)
+                .map(this::convertToProductResponse)
                 .toList();
     }
 
@@ -102,14 +96,16 @@ public class ProductService {
         );
     }
 
-    private ProductListResponse toResponse(Product product) {
+    private ProductResponseForOrder convertToProductResponse(Product product) {
 
-        return ProductListResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .isActive(product.getIsActive())
-                .createdAt(product.getCreatedAt())
-                .build();
+        return new ProductResponseForOrder(
+                product.getId(),
+                product.getName(),
+                product.getSkuCode(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getIsActive()
+        );
     }
 
 }

@@ -4,11 +4,11 @@ import com.techie.microservices.order.client.InventoryClient;
 import com.techie.microservices.order.client.dto.StockRequest;
 import com.techie.microservices.order.model.OrderItemRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class InventoryFacade {
 
@@ -20,7 +20,7 @@ public class InventoryFacade {
 
             StockRequest request = new StockRequest();
 
-            request.setSkuCode(item.getProductId());
+            request.setSkuCode(item.getSkuCode());
             request.setQty(item.getQuantity());
 
             inventoryClient.reserve(request);

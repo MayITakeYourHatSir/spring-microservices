@@ -2,12 +2,12 @@ package com.techie.authservice.service;
 
 import com.techie.authservice.model.dto.LoginRequest;
 import com.techie.authservice.model.dto.LoginResponse;
+import com.techie.authservice.model.dto.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -33,15 +33,19 @@ public class AuthService {
                 )
         );
 
-        UserDetails user = (UserDetails) authentication.getPrincipal();
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         Instant now = Instant.now();
         String scope = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
+
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject(user.getUsername())
+                .subject(principal.username())
                 .issuedAt(now)
                 .expiresAt(now.plus(60, ChronoUnit.MINUTES))
+                .claim("userId", principal.id())
+                .claim("username", principal.username())
+                .claim("email", principal.email())
                 .claim("roles", scope)
                 .build();
 
@@ -49,7 +53,7 @@ public class AuthService {
 
         return LoginResponse.builder()
                 .accessToken(token)
-                .expiresIn(900)
+                .expiresIn(3600)
                 .build();
 
     }

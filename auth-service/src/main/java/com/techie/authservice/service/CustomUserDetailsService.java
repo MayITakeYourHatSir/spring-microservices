@@ -1,5 +1,6 @@
 package com.techie.authservice.service;
 
+import com.techie.authservice.model.dto.UserPrincipal;
 import com.techie.authservice.model.entity.User;
 import com.techie.authservice.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("使用者不存在"));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .authorities(user.getRoles().stream()
+        return new UserPrincipal(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
-                        .toList())
-                .build();
+                        .toList()
+        );
     }
 }

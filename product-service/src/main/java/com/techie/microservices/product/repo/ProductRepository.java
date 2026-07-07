@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends MongoRepository<Product, String>, ProductRepositoryCustom {
 
-    List<Product> findByIdIn(List<String> ids);
+    List<Product> findBySkuCodeIn(List<String> skus);
     
 }

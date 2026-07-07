@@ -65,20 +65,17 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "2.1.6 依商品ID取得商品資料",
+            summary = "2.1.6 依商品 SKU code 取得商品資料",
             description = "提供訂單服務批次查詢商品資訊"
     )
-    @PostMapping("/search-by-ids")
-    public ResponseEntity<ApiResponse<List<ProductListResponse>>> getProductsByIds(
-            @RequestBody ProductIdsRequest request
+    @PostMapping("/search-by-skus")
+    public ResponseEntity<ApiResponse<List<ProductResponseForOrder>>> getProductsBySkus(
+            @RequestBody ProductSkusRequest request
     ) {
 
-        List<ProductListResponse> products =
-                productService.getProductsByIds(request.getProductIds());
+        List<ProductResponseForOrder> products = productService.getProductsBySkus(request.getProductSkus());
 
-        return ResponseEntity.ok(
-                ApiResponse.success(products)
-        );
+        return ResponseEntity.ok(ApiResponse.success(products));
     }
 
 }

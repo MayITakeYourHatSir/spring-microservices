@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(
         scanBasePackages = {
                 "com.techie.microservices.product",
-                "com.techie.common.security"}
+                "com.techie.common"}
 )
 public class ProductServiceApplication {
 

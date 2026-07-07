@@ -25,10 +25,4 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(loginResponse));
     }
 
-    @GetMapping("/test")
-    String test(){
-        System.out.println("test");
-        return "test";
-    }
-
 }

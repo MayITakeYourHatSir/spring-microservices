@@ -1,15 +1,14 @@
 package com.techie.microservices.order.service;
 
-import com.techie.microservices.order.client.dto.ProductListResponse;
+import com.techie.microservices.order.client.dto.ProductResponse;
 import com.techie.microservices.order.exception.DuplicateOrderException;
 import com.techie.microservices.order.exception.OrderNotFoundException;
-import com.techie.microservices.order.exception.ProductInactiveException;
-import com.techie.microservices.order.exception.ProductNotFoundException;
 import com.techie.microservices.order.facade.InventoryFacade;
 import com.techie.microservices.order.facade.ProductFacade;
 import com.techie.microservices.order.mapper.OrderMapper;
 import com.techie.microservices.order.model.*;
 import com.techie.microservices.order.repo.OrderRepository;
+import com.techie.microservices.order.util.OrderNoGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,24 +26,19 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-//    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
     private final ProductFacade productFacade;
     private final InventoryFacade inventoryFacade;
+    private final OrderNoGenerator orderNoGenerator;
 
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request, String idempotencyKey) {
 
         validateIdempotency(idempotencyKey);
-        List<ProductListResponse> products = productFacade.getProductsByIds(extractProductIds(request));
+        List<ProductResponse> products = productFacade.getProductsBySkus(extractProductSkus(request));
 
-        Map<String, ProductListResponse> productMap =
-                products.stream()
-                        .collect(Collectors.toMap(
-                                ProductListResponse::id,
-                                Function.identity()
-                        ));
+        Map<String, ProductResponse> productMap = products.stream()
+                .collect(Collectors.toMap(ProductResponse::skuCode, Function.identity()));
 
-        validateProducts(request, productMap);
         List<OrderItem> orderItems = buildOrderItems(request, productMap);
         BigDecimal totalAmount = calculateTotalAmount(orderItems);
         inventoryFacade.reserve(request.getItems());
@@ -62,6 +56,19 @@ public class OrderService {
 
     }
 
+    @Transactional
+    public OrderDetailResponse getOrder(Long orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new OrderNotFoundException(
+                                "Order not found : " + orderId
+                        )
+                );
+
+        return orderMapper.toDetailResponse(order);
+    }
+
     private void validateIdempotency(String idempotencyKey) {
 
         if (idempotencyKey == null) {
@@ -76,70 +83,33 @@ public class OrderService {
                 });
     }
 
-    @Transactional
-    public OrderDetailResponse getOrder(Long orderId) {
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() ->
-                        new OrderNotFoundException(
-                                "Order not found : " + orderId
-                        )
-                );
-
-        return orderMapper.toDetailResponse(order);
-    }
-
-    private List<String> extractProductIds(
+    private List<String> extractProductSkus(
             CreateOrderRequest request
     ) {
 
         return request.getItems()
                 .stream()
-                .map(OrderItemRequest::getProductId)
+                .map(OrderItemRequest::getSkuCode)
                 .distinct()
                 .toList();
     }
 
-    private void validateProducts(
-            CreateOrderRequest request,
-            Map<String, ProductListResponse> productMap
-    ) {
-
-        for (OrderItemRequest item : request.getItems()) {
-
-            ProductListResponse product =
-                    productMap.get(item.getProductId());
-
-            if (product == null) {
-                throw new ProductNotFoundException(
-                        item.getProductId()
-                );
-            }
-
-            if (!product.isActive()) {
-                throw new ProductInactiveException(
-                        item.getProductId()
-                );
-            }
-        }
-    }
-
     private List<OrderItem> buildOrderItems(
             CreateOrderRequest request,
-            Map<String, ProductListResponse> productMap
+            Map<String, ProductResponse> productMap
     ) {
 
         return request.getItems()
                 .stream()
                 .map(itemRequest -> {
 
-                    ProductListResponse product =
-                            productMap.get(itemRequest.getProductId());
+                    ProductResponse product = productMap.get(itemRequest.getSkuCode());
 
                     OrderItem item = new OrderItem();
 
                     item.setProductId(product.id());
                     item.setProductName(product.name());
+                    item.setSkuCode(itemRequest.getSkuCode());
                     item.setPrice(product.price());
                     item.setQuantity(itemRequest.getQuantity());
 
@@ -154,11 +124,7 @@ public class OrderService {
 
         return items.stream()
                 .map(item ->
-                        item.getPrice().multiply(
-                                BigDecimal.valueOf(
-                                        item.getQuantity()
-                                )
-                        )
+                        item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
                 )
                 .reduce(
                         BigDecimal.ZERO,
@@ -175,6 +141,7 @@ public class OrderService {
 
         Order order = new Order();
 
+        order.setOrderNo(orderNoGenerator.generate());
         order.setUserId(request.getUserId());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setTotalAmount(totalAmount);

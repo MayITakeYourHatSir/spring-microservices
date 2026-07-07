@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class OrderItemRequest {
 
-    private String productId;
+    private String skuCode;
     private Integer quantity;
 
 }

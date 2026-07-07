@@ -1,10 +1,7 @@
 package com.techie.microservices.order.client;
 
 import com.techie.common.dto.ApiResponse;
-import com.techie.microservices.order.client.dto.PageResponse;
-import com.techie.microservices.order.client.dto.ProductIdsRequest;
-import com.techie.microservices.order.client.dto.ProductListResponse;
-import com.techie.microservices.order.client.dto.ProductSearchRequest;
+import com.techie.microservices.order.client.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,9 +20,9 @@ public interface ProductClient {
             @RequestParam(defaultValue = "10") Integer size
     );
 
-    @PostExchange("/search-by-ids")
-    ResponseEntity<ApiResponse<List<ProductListResponse>>> getProductsByIds(
-            @RequestBody ProductIdsRequest request
+    @PostExchange("/search-by-skus")
+    ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsBySkus(
+            @RequestBody ProductSkusRequest request
     );
 
 }

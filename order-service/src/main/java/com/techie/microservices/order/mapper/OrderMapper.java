@@ -15,6 +15,7 @@ public class OrderMapper {
                 .toList();
 
         return CreateOrderResponse.builder()
+                .orderId(order.getId())
                 .orderNo(order.getOrderNo())
                 .status(order.getStatus().name())
                 .totalAmount(order.getTotalAmount())

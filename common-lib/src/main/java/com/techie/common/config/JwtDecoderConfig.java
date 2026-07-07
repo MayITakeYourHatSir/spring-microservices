@@ -1,5 +1,6 @@
-package com.techie.common.security;
+package com.techie.common.config;
 
+import com.techie.common.security.RsaKeyLoader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

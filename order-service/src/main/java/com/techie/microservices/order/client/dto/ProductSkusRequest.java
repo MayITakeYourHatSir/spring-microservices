@@ -1,4 +1,4 @@
-package com.techie.microservices.product.model;
+package com.techie.microservices.order.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductIdsRequest {
+public class ProductSkusRequest {
 
-    private List<String> productIds;
+    private List<String> productSkus;
 
 }

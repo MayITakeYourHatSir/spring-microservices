@@ -65,4 +65,21 @@ public class Routes {
                 .build();
     }
 
+    @Bean
+    public RouterFunction<ServerResponse> AuthServiceRoute(){
+        return GatewayRouterFunctions.route("auth-service")
+                .route(RequestPredicates.path("/auth/**"), http())
+                .before(uri("http://localhost:8083"))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> AuthServiceSwaggerRoute(){
+        return GatewayRouterFunctions.route("auth-service-swagger")
+                .route(RequestPredicates.path("/aggregate/auth-service/v3/api-docs"), http())
+                .before(uri("http://localhost:8083"))
+                .before(rewritePath("/aggregate/auth-service", ""))
+                .build();
+    }
+
 }
