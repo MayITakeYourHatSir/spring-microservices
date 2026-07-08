@@ -1,5 +1,6 @@
 package com.techie.microservices.order.service;
 
+import com.techie.common.security.SecurityUtil;
 import com.techie.microservices.order.client.dto.ProductResponse;
 import com.techie.microservices.order.exception.DuplicateOrderException;
 import com.techie.microservices.order.exception.OrderNotFoundException;
@@ -29,9 +30,10 @@ public class OrderService {
     private final ProductFacade productFacade;
     private final InventoryFacade inventoryFacade;
     private final OrderNoGenerator orderNoGenerator;
+    private final SecurityUtil securityUtil;
 
     @Transactional
-    public CreateOrderResponse createOrder(CreateOrderRequest request, String idempotencyKey) {
+    public CreateOrderResponse createOrder(List<OrderItemRequest> request, String idempotencyKey) {
 
         validateIdempotency(idempotencyKey);
         List<ProductResponse> products = productFacade.getProductsBySkus(extractProductSkus(request));
@@ -41,10 +43,9 @@ public class OrderService {
 
         List<OrderItem> orderItems = buildOrderItems(request, productMap);
         BigDecimal totalAmount = calculateTotalAmount(orderItems);
-        inventoryFacade.reserve(request.getItems());
+        inventoryFacade.reserve(request);
 
         Order order = buildOrder(
-                request,
                 orderItems,
                 totalAmount,
                 idempotencyKey
@@ -84,23 +85,21 @@ public class OrderService {
     }
 
     private List<String> extractProductSkus(
-            CreateOrderRequest request
+            List<OrderItemRequest> request
     ) {
 
-        return request.getItems()
-                .stream()
+        return request.stream()
                 .map(OrderItemRequest::getSkuCode)
                 .distinct()
                 .toList();
     }
 
     private List<OrderItem> buildOrderItems(
-            CreateOrderRequest request,
+            List<OrderItemRequest> request,
             Map<String, ProductResponse> productMap
     ) {
 
-        return request.getItems()
-                .stream()
+        return request.stream()
                 .map(itemRequest -> {
 
                     ProductResponse product = productMap.get(itemRequest.getSkuCode());
@@ -133,7 +132,6 @@ public class OrderService {
     }
 
     private Order buildOrder(
-            CreateOrderRequest request,
             List<OrderItem> orderItems,
             BigDecimal totalAmount,
             String idempotencyKey
@@ -142,7 +140,7 @@ public class OrderService {
         Order order = new Order();
 
         order.setOrderNo(orderNoGenerator.generate());
-        order.setUserId(request.getUserId());
+        order.setUserId(securityUtil.getCurrentUserId());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setTotalAmount(totalAmount);
         order.setIdempotencyKey(idempotencyKey);
