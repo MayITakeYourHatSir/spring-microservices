@@ -1,5 +1,7 @@
 package com.techie.microservices.order.service;
 
+import com.techie.common.event.OrderCreatedEvent;
+import com.techie.common.event.OrderItemEvent;
 import com.techie.common.security.SecurityUtil;
 import com.techie.microservices.order.client.dto.ProductResponse;
 import com.techie.microservices.order.exception.DuplicateOrderException;
@@ -8,6 +10,7 @@ import com.techie.microservices.order.facade.InventoryFacade;
 import com.techie.microservices.order.facade.ProductFacade;
 import com.techie.microservices.order.mapper.OrderMapper;
 import com.techie.microservices.order.model.*;
+import com.techie.microservices.order.publisher.OrderEventPublisher;
 import com.techie.microservices.order.repo.OrderRepository;
 import com.techie.microservices.order.util.OrderNoGenerator;
 import jakarta.transaction.Transactional;
@@ -31,6 +34,7 @@ public class OrderService {
     private final InventoryFacade inventoryFacade;
     private final OrderNoGenerator orderNoGenerator;
     private final SecurityUtil securityUtil;
+    private final OrderEventPublisher orderEventPublisher;
 
     @Transactional
     public CreateOrderResponse createOrder(List<OrderItemRequest> request, String idempotencyKey) {
@@ -52,6 +56,27 @@ public class OrderService {
         );
 
         orderRepository.save(order);
+
+        OrderCreatedEvent event = OrderCreatedEvent.builder()
+                .orderId(order.getId())
+                .orderNo(order.getOrderNo())
+                .email(securityUtil.getCurrentEmail())
+                .totalAmount(order.getTotalAmount())
+                .createdAt(order.getCreatedAt())
+                .items(
+                        order.getItems().stream()
+                                .map(item ->
+                                        OrderItemEvent.builder()
+                                                .skuCode(item.getSkuCode())
+                                                .productName(item.getProductName())
+                                                .quantity(item.getQuantity())
+                                                .build()
+                                )
+                                .toList()
+                )
+                .build();
+
+        orderEventPublisher.publish(event);
 
         return orderMapper.toResponse(order);
 
