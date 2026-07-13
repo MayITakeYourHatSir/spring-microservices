@@ -1,6 +1,5 @@
 package com.techie.microservices.order.publisher;
 
-import com.techie.common.config.RabbitMQConfig;
 import com.techie.common.constant.RabbitMQConstants;
 import com.techie.common.event.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;

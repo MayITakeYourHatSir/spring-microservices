@@ -35,3 +35,5 @@ log/
 
 # === Node (如未使用可忽略) ===
 node_modules/
+/notification-service/src/main/resources/credentials.json
+/notification-service/tokens/StoredCredential
