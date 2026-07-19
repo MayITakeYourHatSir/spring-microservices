@@ -217,10 +217,5 @@ spring-microservices
 
 目前仍持續擴充中，預計加入：
 
-- Redis 快取
-- Kubernetes 部署
-- Prometheus + Grafana 監控
-- OpenTelemetry 分散式追蹤
-- CI/CD 自動化部署
-- API Rate Limiting
-- Circuit Breaker
+- Refresh Token
+- Eureka Server
